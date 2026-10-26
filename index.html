@@ -2,7 +2,7 @@
 <html lang="zh-HK">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Essential Oil Inventory - Stephanie Team</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -23,14 +23,14 @@
       color: var(--text);
       margin: 0;
       padding: 16px;
-      padding-bottom: 80px;
+      padding-top: calc(16px + env(safe-area-inset-top, 20px));
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
     }
     
-    /* 📱 Header 完美置中與極致排版 */
     .app-header {
       text-align: center;
       color: #6d4c41;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       padding: 0 8px;
     }
     .header-line-1 {
@@ -39,7 +39,7 @@
       margin-bottom: 4px;
     }
     .header-line-2-container {
-      display: inline-block; /* 讓整個標題群組可以完美置中 */
+      display: inline-block;
       text-align: left;
     }
     .header-line-2-wrapper {
@@ -69,7 +69,7 @@
       font-weight: normal;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
       flex-shrink: 0;
-      width: auto !important; /* 防止被 width: 100% 影響拉長 */
+      width: auto !important;
     }
 
     .card {
@@ -83,22 +83,36 @@
       border-left: 5px solid var(--alert);
       background: #fff5f5;
     }
+    
     .oil-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 0;
       border-bottom: 1px solid #eee;
+      gap: 10px;
     }
     .oil-item:last-child { border-bottom: none; }
-    .oil-name { font-weight: bold; font-size: 1.1em; }
+    .oil-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .oil-name { 
+      font-weight: bold; 
+      font-size: 1.05em; 
+      line-height: 1.3;
+      word-break: break-word;
+    }
     .oil-details { font-size: 0.85em; color: #666; margin-top: 4px; }
+    
     .badge {
       padding: 4px 8px;
       border-radius: 12px;
       font-size: 0.8em;
       font-weight: bold;
       cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .badge-opened { background: #ffe3e3; color: #c92a2a; }
     .badge-unopened { background: #d3f9d8; color: #2b8a3e; }
@@ -124,9 +138,13 @@
     button.warning { background-color: #d97706; }
     
     .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-    .action-btns { display: flex; gap: 4px; align-items: center; }
+    .action-btns { 
+      display: flex; 
+      gap: 4px; 
+      align-items: center; 
+      flex-shrink: 0; 
+    }
     
-    /* 🔒 密碼鎖畫面樣式 (Stephanie Team IP) */
     #lock-screen {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
@@ -231,7 +249,7 @@
       <div id="restock-list"></div>
     </div>
 
-    <!-- 快速選單 -->
+    <!-- 快速選單 (已加入數量選擇) -->
     <div class="card">
       <h2 id="form-title" style="font-size:1.1em;">➕ 快速選單 / 搜尋入庫</h2>
       <input type="hidden" id="edit-id">
@@ -241,16 +259,28 @@
       
       <datalist id="yl-oils-datalist"></datalist>
 
-      <select id="oil-size">
-        <option value="15">15 ml</option>
-        <option value="5">5 ml</option>
-        <option value="10">10 ml (Roll-on)</option>
-      </select>
-      
-      <select id="oil-status">
-        <option value="unopened">未開封 (Unopened)</option>
-        <option value="opened">已開封 (Opened)</option>
-      </select>
+      <div style="display: flex; gap: 8px;">
+        <div style="flex: 1;">
+          <label style="font-size: 0.8em; color: #666;">容量：</label>
+          <select id="oil-size">
+            <option value="15">15 ml</option>
+            <option value="5">5 ml</option>
+            <option value="10">10 ml (Roll-on)</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 0.8em; color: #666;">狀態：</label>
+          <select id="oil-status">
+            <option value="unopened">未開封</option>
+            <option value="opened">已開封</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 8px;">
+        <label style="font-size: 0.8em; color: #666;">數量：</label>
+        <input type="number" id="oil-qty" value="1" min="1" max="99" style="margin-top: 2px; padding: 8px;">
+      </div>
 
       <button id="submit-btn" onclick="saveOilItem()">➕ 確認新增至庫存</button>
       <button id="cancel-btn" onclick="resetForm()" class="secondary" style="display:none; margin-top:6px;">取消編輯</button>
@@ -258,7 +288,7 @@
 
     <!-- 庫存列表 -->
     <div class="card">
-      <h2 style="font-size:1.1em;">目前庫存 (<span id="total-count">0</span>)</h2>
+      <h2 style="font-size:1.1em;">目前庫存種類 (<span id="total-count">0</span>)</h2>
       <input type="text" id="search-input" onkeyup="render()" placeholder="🔍 在庫存中搜尋英文名稱...">
       <div id="oil-list"></div>
     </div>
@@ -324,7 +354,6 @@
       }
     }
 
-    // 港美 Young Living 精油資料庫
     const ylFullDatabase = [
       "Angelica (天使草)", "Anise (茴香) [US]", "Basil (羅勒)", "Bergamot (佛手柑)", "Black Pepper (黑胡椒)",
       "Blue Cypress (藍絲柏)", "Blue Tansy (藍艾菊)", "Bourbon Geranium (波旁天竺葵)", "Cardamom (豆蔻)",
@@ -384,6 +413,7 @@
     function saveOilItem() {
       const editId = document.getElementById('edit-id').value;
       const rawInput = document.getElementById('oil-name-input').value.trim();
+      const qty = parseInt(document.getElementById('oil-qty').value) || 1;
 
       if (!rawInput) {
         alert('請選取或輸入精油英文名稱！');
@@ -400,6 +430,7 @@
           item.name = name;
           item.size = size;
           item.status = status;
+          item.qty = qty;
           alert(`已成功更新 ${name} 的資料！`);
         }
       } else {
@@ -408,10 +439,11 @@
           name: name,
           size: size,
           status: status,
+          qty: qty,
           dateAdded: new Date().toLocaleDateString()
         };
         inventory.push(newItem);
-        alert(`已成功加入 ${name} (${size}ml)！`);
+        alert(`已成功加入 ${qty} 支 ${name} (${size}ml)！`);
       }
 
       saveData();
@@ -425,6 +457,7 @@
         document.getElementById('oil-name-input').value = item.name;
         document.getElementById('oil-size').value = item.size;
         document.getElementById('oil-status').value = item.status;
+        document.getElementById('oil-qty').value = item.qty || 1;
         
         document.getElementById('form-title').innerText = '✏️ 修改精油資料';
         document.getElementById('submit-btn').innerText = '💾 儲存修改';
@@ -440,6 +473,7 @@
       document.getElementById('oil-name-input').value = '';
       document.getElementById('oil-size').value = '15';
       document.getElementById('oil-status').value = 'unopened';
+      document.getElementById('oil-qty').value = '1';
       
       document.getElementById('form-title').innerText = '➕ 快速選單 / 搜尋入庫';
       document.getElementById('submit-btn').innerText = '➕ 確認新增至庫存';
@@ -448,7 +482,7 @@
     }
 
     function deleteOil(id) {
-      if (confirm('確定要刪除此瓶精油紀錄嗎？')) {
+      if (confirm('確定要刪除此項精油紀錄嗎？')) {
         inventory = inventory.filter(item => item.id !== id);
         saveData();
       }
@@ -469,14 +503,15 @@
       
       listEl.innerHTML = '';
       const filtered = inventory.filter(item => item.name.toLowerCase().includes(search));
-      totalCountEl.innerText = inventory.length;
+      totalCountEl.innerText = filtered.length;
 
       filtered.forEach(item => {
+        const qty = item.qty || 1;
         const div = document.createElement('div');
         div.className = 'oil-item';
         div.innerHTML = `
-          <div>
-            <div class="oil-name">${item.name} (${item.size}ml)</div>
+          <div class="oil-info">
+            <div class="oil-name">${item.name} (${item.size}ml) <span style="color: var(--primary); font-size: 0.9em;">× ${qty}</span></div>
             <div class="oil-details">入庫: ${item.dateAdded}</div>
           </div>
           <div class="action-btns">
@@ -501,26 +536,26 @@
 
       const allSummary = {};
       inventory.forEach(item => {
-        if (!allSummary[item.name]) {
-          allSummary[item.name] = { unopenedItems: [], openedCount: 0 };
+        const qty = item.qty || 1;
+        const key = `${item.name}_${item.size}`;
+        if (!allSummary[key]) {
+          allSummary[key] = { name: item.name, size: item.size, unopenedQty: 0, openedQty: 0 };
         }
         if (item.status === 'unopened') {
-          allSummary[item.name].unopenedItems.push(item.size);
+          allSummary[key].unopenedQty += qty;
         } else {
-          allSummary[item.name].openedCount++;
+          allSummary[key].openedQty += qty;
         }
       });
 
       const level1Alerts = [];
       const level2Alerts = [];
 
-      for (const [name, data] of Object.entries(allSummary)) {
-        const unopenedCount = data.unopenedItems.length;
-
-        if (unopenedCount === 0) {
-          level1Alerts.push(`🔴 <strong>${name}</strong>：完全無未開封存貨 (已開剩 ${data.openedCount} 支)`);
-        } else if (unopenedCount === 1 && data.unopenedItems[0] === '5') {
-          level2Alerts.push(`🟡 <strong>${name}</strong>：未開封只剩 1 支 5ml (低庫存預警)`);
+      for (const data of Object.values(allSummary)) {
+        if (data.unopenedQty === 0) {
+          level1Alerts.push(`🔴 <strong>${data.name} (${data.size}ml)</strong>：完全無未開封存貨 (已開總共 ${data.openedQty} 支)`);
+        } else if (data.unopenedQty === 1 && data.size === '5') {
+          level2Alerts.push(`🟡 <strong>${data.name} (5ml)</strong>：未開封只剩 1 支 (低庫存預警)`);
         }
       }
 
