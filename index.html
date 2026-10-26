@@ -27,38 +27,37 @@
       padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
     }
     
+    /* 📱 Header 置中標題 + 改名掣放最右 */
     .app-header {
-      text-align: center;
       color: #6d4c41;
       margin-bottom: 20px;
-      padding: 0 8px;
+      padding: 0 4px;
     }
     .header-line-1 {
+      text-align: center;
       font-size: 1.1em;
       font-weight: bold;
       margin-bottom: 4px;
     }
-    .header-line-2-container {
-      display: inline-block;
-      text-align: left;
-    }
-    .header-line-2-wrapper {
-      display: inline-flex;
+    .header-line-2-row {
+      position: relative;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      white-space: nowrap;
+      justify-content: center; /* 確保標題絕對置中 */
+      min-height: 32px;
     }
     .header-title-text {
       font-size: 1.1em;
       font-weight: bold;
       white-space: nowrap;
+      text-align: center;
     }
     .user-name-tag {
       color: #6d4c41;
     }
     .edit-name-btn {
-      display: inline-flex;
-      align-items: center;
+      position: absolute;
+      right: 0; /* 靠最右邊對齊 */
       font-size: 0.65em;
       padding: 3px 8px;
       background: #bfa071;
@@ -68,7 +67,6 @@
       cursor: pointer;
       font-weight: normal;
       box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-      flex-shrink: 0;
       width: auto !important;
     }
 
@@ -235,11 +233,9 @@
       <div class="header-line-1">
         🌿 <span id="user-title-name" class="user-name-tag">Stephanie 的</span>
       </div>
-      <div class="header-line-2-container">
-        <div class="header-line-2-wrapper">
-          <span class="header-title-text">YL精油庫存管理</span>
-          <button class="edit-name-btn" onclick="changeUserName()">✏️ 改名</button>
-        </div>
+      <div class="header-line-2-row">
+        <span class="header-title-text">YL精油庫存管理</span>
+        <button class="edit-name-btn" onclick="changeUserName()">✏️ 改名</button>
       </div>
     </div>
 
@@ -334,7 +330,23 @@
       document.getElementById('lock-screen').style.display = 'none';
       document.getElementById('app-content').style.display = 'block';
       initDatalist();
+      
+      autoConsolidateInventory();
       render();
+    }
+
+    function autoConsolidateInventory() {
+      const map = {};
+      inventory.forEach(item => {
+        const qty = parseInt(item.qty) || 1;
+        const key = `${item.name}_${item.size}_${item.status}`;
+        if (!map[key]) {
+          map[key] = { ...item, qty: 0 };
+        }
+        map[key].qty += qty;
+      });
+      inventory = Object.values(map);
+      localStorage.setItem('yl_essential_oils', JSON.stringify(inventory));
     }
 
     function changeUserName() {
@@ -410,7 +422,6 @@
       render();
     }
 
-    // 💡 真正的 Grouping 儲存邏輯：同名、同容量、同狀態會自動疊加數量
     function saveOilItem() {
       const editId = document.getElementById('edit-id').value;
       const rawInput = document.getElementById('oil-name-input').value.trim();
@@ -426,7 +437,6 @@
       const status = document.getElementById('oil-status').value;
 
       if (editId) {
-        // 編輯現有項目
         const item = inventory.find(i => i.id === editId);
         if (item) {
           item.name = name;
@@ -436,10 +446,9 @@
           alert(`已成功更新 ${name} 的資料！`);
         }
       } else {
-        // 新增或自動合併 Grouping
         const existingItem = inventory.find(i => i.name === name && i.size === size && i.status === status);
         if (existingItem) {
-          existingItem.qty = (existingItem.qty || 1) + qtyToAdd;
+          existingItem.qty = (parseInt(existingItem.qty) || 1) + qtyToAdd;
           alert(`已自動合併！${name} (${size}ml) 數量增加 ${qtyToAdd} 支 (現共 ${existingItem.qty} 支)！`);
         } else {
           const newItem = {
@@ -512,7 +521,7 @@
       
       listEl.innerHTML = '';
       const filtered = inventory.filter(item => item.name.toLowerCase().includes(search));
-      totalCountEl.innerText = inventory.length;
+      totalCountEl.innerText = filtered.length;
 
       filtered.forEach(item => {
         const qty = item.qty || 1;
@@ -545,7 +554,7 @@
 
       const allSummary = {};
       inventory.forEach(item => {
-        const qty = item.qty || 1;
+        const qty = parseInt(item.qty) || 1;
         const key = `${item.name}_${item.size}`;
         if (!allSummary[key]) {
           allSummary[key] = { name: item.name, size: item.size, unopenedQty: 0, openedQty: 0 };
