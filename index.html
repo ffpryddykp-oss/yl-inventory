@@ -249,7 +249,7 @@
       <div id="restock-list"></div>
     </div>
 
-    <!-- 快速選單 (已加入數量選擇) -->
+    <!-- 快速選單 -->
     <div class="card">
       <h2 id="form-title" style="font-size:1.1em;">➕ 快速選單 / 搜尋入庫</h2>
       <input type="hidden" id="edit-id">
@@ -410,10 +410,11 @@
       render();
     }
 
+    // 💡 真正的 Grouping 儲存邏輯：同名、同容量、同狀態會自動疊加數量
     function saveOilItem() {
       const editId = document.getElementById('edit-id').value;
       const rawInput = document.getElementById('oil-name-input').value.trim();
-      const qty = parseInt(document.getElementById('oil-qty').value) || 1;
+      const qtyToAdd = parseInt(document.getElementById('oil-qty').value) || 1;
 
       if (!rawInput) {
         alert('請選取或輸入精油英文名稱！');
@@ -425,25 +426,33 @@
       const status = document.getElementById('oil-status').value;
 
       if (editId) {
+        // 編輯現有項目
         const item = inventory.find(i => i.id === editId);
         if (item) {
           item.name = name;
           item.size = size;
           item.status = status;
-          item.qty = qty;
+          item.qty = qtyToAdd;
           alert(`已成功更新 ${name} 的資料！`);
         }
       } else {
-        const newItem = {
-          id: Date.now().toString(),
-          name: name,
-          size: size,
-          status: status,
-          qty: qty,
-          dateAdded: new Date().toLocaleDateString()
-        };
-        inventory.push(newItem);
-        alert(`已成功加入 ${qty} 支 ${name} (${size}ml)！`);
+        // 新增或自動合併 Grouping
+        const existingItem = inventory.find(i => i.name === name && i.size === size && i.status === status);
+        if (existingItem) {
+          existingItem.qty = (existingItem.qty || 1) + qtyToAdd;
+          alert(`已自動合併！${name} (${size}ml) 數量增加 ${qtyToAdd} 支 (現共 ${existingItem.qty} 支)！`);
+        } else {
+          const newItem = {
+            id: Date.now().toString(),
+            name: name,
+            size: size,
+            status: status,
+            qty: qtyToAdd,
+            dateAdded: new Date().toLocaleDateString()
+          };
+          inventory.push(newItem);
+          alert(`已成功加入 ${qtyToAdd} 支 ${name} (${size}ml)！`);
+        }
       }
 
       saveData();
@@ -503,7 +512,7 @@
       
       listEl.innerHTML = '';
       const filtered = inventory.filter(item => item.name.toLowerCase().includes(search));
-      totalCountEl.innerText = filtered.length;
+      totalCountEl.innerText = inventory.length;
 
       filtered.forEach(item => {
         const qty = item.qty || 1;
@@ -511,7 +520,7 @@
         div.className = 'oil-item';
         div.innerHTML = `
           <div class="oil-info">
-            <div class="oil-name">${item.name} (${item.size}ml) <span style="color: var(--primary); font-size: 0.9em;">× ${qty}</span></div>
+            <div class="oil-name">${item.name} (${item.size}ml) <span style="color: var(--primary); font-size: 0.9em; font-weight: bold;">× ${qty}</span></div>
             <div class="oil-details">入庫: ${item.dateAdded}</div>
           </div>
           <div class="action-btns">
