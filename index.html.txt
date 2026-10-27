@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Essential Oil Inventory - Stephanie Team</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Stephanie Oils">
+  
+  <style>
+    :root {
+      --primary: #4a7c59;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --alert: #e63946;
+      --warning: #d97706;
+      --text: #2b2d42;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top, 20px));
+      padding-bottom: calc(80px + env(safe-area-inset-bottom, 20px));
+    }
+    
+    .app-header {
+      color: #6d4c41;
+      margin-bottom: 20px;
+      padding: 0 4px;
+    }
+    .header-line-1 {
+      text-align: center;
+      font-size: 1.1em;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .header-line-2-row {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 32px;
+    }
+    .header-title-text {
+      font-size: 1.1em;
+      font-weight: bold;
+      white-space: nowrap;
+      text-align: center;
+    }
+    .user-name-tag {
+      color: #6d4c41;
+    }
+    .edit-name-btn {
+      position: absolute;
+      right: 0;
+      font-size: 0.65em;
+      padding: 3px 8px;
+      background: #bfa071;
+      color: #ffffff;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: normal;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+      width: auto !important;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    .alert-box {
+      border-left: 5px solid var(--alert);
+      background: #fff5f5;
+    }
+    
+    .oil-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+      gap: 10px;
+    }
+    .oil-item:last-child { border-bottom: none; }
+    .oil-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .oil-name { 
+      font-weight: bold; 
+      font-size: 1.05em; 
+      line-height: 1.3;
+      word-break: break-word;
+    }
+    .oil-details { font-size: 0.85em; color: #666; margin-top: 4px; }
+    
+    .badge {
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8em;
+      font-weight: bold;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-opened { background: #ffe3e3; color: #c92a2a; }
+    .badge-unopened { background: #d3f9d8; color: #2b8a3e; }
+    
+    input, select, button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    button {
+      background-color: var(--primary);
+      color: white;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button.secondary { background-color: #6c757d; }
+    button.danger { background-color: #e63946; }
+    button.warning { background-color: #d97706; }
+    
+    .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+    .action-btns { 
+      display: flex; 
+      gap: 4px; 
+      align-items: center; 
+      flex-shrink: 0; 
+    }
+    
+    #lock-screen {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #fdfae5;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+      z-index: 9999;
+    }
+    
+    .ip-header {
+      color: #6d4c41;
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 1.35em;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+    }
+    
+    .passcode-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 360px;
+    }
+    
+    .passcode-wrapper::before,
+    .passcode-wrapper::after {
+      content: '✦';
+      position: absolute;
+      color: #bfa071;
+      font-size: 1.2em;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .passcode-wrapper::before { left: 16px; }
+    .passcode-wrapper::after { right: 16px; }
+    
+    #passcode-input {
+      background: #ffffff;
+      border: 1px solid #bfa071;
+      padding: 12px 40px;
+      font-size: 1.3em;
+      color: #6d4c41;
+      text-align: center;
+      border-radius: 30px;
+    }
+    
+    #unlock-btn {
+      background-color: #6d4c41;
+      color: #fdfae5;
+      border-radius: 30px;
+      margin-top: 16px;
+      width: 100%;
+      font-size: 1.1em;
+    }
+    
+    #pwd-error {
+      color: var(--alert);
+      font-size: 0.85em;
+      margin-top: 12px;
+      display: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 🔒 密碼驗證頁面 -->
+  <div id="lock-screen">
+    <div class="ip-header">
+      Stephanie Team @ CSS
+    </div>
+    
+    <div class="passcode-wrapper">
+      <input type="password" id="passcode-input" placeholder="請輸入存取通行密碼...">
+    </div>
+    <button id="unlock-btn" onclick="verifyPasscode()">✦ 解鎖進入 ✦</button>
+    <div id="pwd-error">❌ 密碼不正確，請重新輸入！</div>
+    
+    <div style="font-size: 0.8em; color: #bfa071; margin-top: 40px;"> Copyright © Stephanie Team@CSS </div>
+  </div>
+
+  <!-- 📱 App 主體 -->
+  <div id="app-content" style="display: none;">
+    <div class="app-header">
+      <div class="header-line-1">
+        🌿 <span id="user-title-name" class="user-name-tag">Stephanie 的</span>
+      </div>
+      <div class="header-line-2-row">
+        <span class="header-title-text">YL精油庫存管理</span>
+        <button class="edit-name-btn" onclick="changeUserName()">✏️ 改名</button>
+      </div>
+    </div>
+
+    <!-- 補貨提示區 -->
+    <div id="restock-section" class="card alert-box" style="display:none;">
+      <h2 style="color: var(--alert); margin-top:0; font-size:1.1em;">⚠️ 庫存補貨提醒</h2>
+      <div id="restock-list"></div>
+    </div>
+
+    <!-- 快速選單 -->
+    <div class="card">
+      <h2 id="form-title" style="font-size:1.1em;">➕ 快速選單 / 搜尋入庫</h2>
+      <input type="hidden" id="edit-id">
+      
+      <label style="font-size: 0.85em; color: #666; font-weight: bold;">點擊選擇或輸入英文字母快速搜尋：</label>
+      <input list="yl-oils-datalist" id="oil-name-input" placeholder="🔍 點擊選取或輸入 (例: Peppermint, Valor)..." autocomplete="off">
+      
+      <datalist id="yl-oils-datalist"></datalist>
+
+      <div style="display: flex; gap: 8px;">
+        <div style="flex: 1;">
+          <label style="font-size: 0.8em; color: #666;">容量：</label>
+          <select id="oil-size">
+            <option value="15 ml">15 ml</option>
+            <option value="10 ml">10 ml</option>
+            <option value="5 ml">5 ml</option>
+            <option value="Roll-on">Roll-on</option>
+          </select>
+        </div>
+        <div style="flex: 1;">
+          <label style="font-size: 0.8em; color: #666;">狀態：</label>
+          <select id="oil-status">
+            <option value="unopened">未開封</option>
+            <option value="opened">已開封</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="margin-top: 8px;">
+        <label style="font-size: 0.8em; color: #666;">數量：</label>
+        <input type="number" id="oil-qty" value="1" min="1" max="99" style="margin-top: 2px; padding: 8px;">
+      </div>
+
+      <button id="submit-btn" onclick="saveOilItem()">➕ 確認新增至庫存</button>
+      <button id="cancel-btn" onclick="resetForm()" class="secondary" style="display:none; margin-top:6px;">取消編輯</button>
+    </div>
+
+    <!-- 庫存列表 -->
+    <div class="card">
+      <h2 style="font-size:1.1em;">目前庫存種類 (<span id="total-count">0</span>)</h2>
+      <input type="text" id="search-input" onkeyup="render()" placeholder="🔍 在庫存中搜尋英文名稱...">
+      <div id="oil-list"></div>
+    </div>
+
+    <!-- 資料備份與還原 -->
+    <div class="card">
+      <h2 style="font-size:1.1em;">💾 資料備份與還原</h2>
+      <div class="btn-group">
+        <button onclick="exportData()" class="secondary" style="flex: 1;">下載 JSON 備份</button>
+        <input type="file" id="import-file" style="display: none;" accept=".json" onchange="importData(event)">
+        <button onclick="document.getElementById('import-file').click()" class="warning" style="flex: 1;">上載還原 JSON</button>
+        <button onclick="clearData()" class="danger" style="flex: 1;">清空所有數據</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SECRET_PASSCODE = "cssteam";
+
+    function verifyPasscode() {
+      const input = document.getElementById('passcode-input').value;
+      const errorMsg = document.getElementById('pwd-error');
+      
+      if (input === SECRET_PASSCODE) {
+        localStorage.setItem('stephanie_app_auth', 'true');
+        checkUserNameAndStart();
+      } else {
+        errorMsg.style.display = 'block';
+      }
+    }
+
+    function checkUserNameAndStart() {
+      let userName = localStorage.getItem('yl_user_name');
+      if (!userName) {
+        userName = prompt("請輸入您的名字 (例如: Stephanie / Carmen):", "Stephanie");
+        if (!userName || userName.trim() === "") {
+          userName = "我的";
+        }
+        localStorage.setItem('yl_user_name', userName.trim());
+      }
+      
+      document.getElementById('user-title-name').innerText = userName.trim() + " 的";
+      document.getElementById('lock-screen').style.display = 'none';
+      document.getElementById('app-content').style.display = 'block';
+      initDatalist();
+      
+      fixOldInventoryFormat();
+      autoConsolidateInventory();
+      render();
+    }
+
+    function fixOldInventoryFormat() {
+      let data = JSON.parse(localStorage.getItem('yl_essential_oils')) || [];
+      let updated = false;
+      data.forEach(item => {
+        if (item.size === '15') { item.size = '15 ml'; updated = true; }
+        if (item.size === '5') { item.size = '5 ml'; updated = true; }
+        if (item.size === '10') { item.size = '10 ml'; updated = true; }
+        if (item.size === '10 (Roll-on)' || item.size === 'Roll-on (10ml)') { item.size = 'Roll-on'; updated = true; }
+        // 修正舊資料中的 R.C. 為 RC
+        if (item.name && item.name.startsWith('R.C.')) {
+          item.name = item.name.replace('R.C.', 'RC');
+          updated = true;
+        }
+      });
+      if (updated) {
+        localStorage.setItem('yl_essential_oils', JSON.stringify(data));
+      }
+      inventory = data;
+    }
+
+    function autoConsolidateInventory() {
+      const map = {};
+      inventory.forEach(item => {
+        const qty = parseInt(item.qty) || 1;
+        const key = `${item.name}_${item.size}_${item.status}`;
+        if (!map[key]) {
+          map[key] = { ...item, qty: 0 };
+        }
+        map[key].qty += qty;
+      });
+      inventory = Object.values(map);
+      localStorage.setItem('yl_essential_oils', JSON.stringify(inventory));
+    }
+
+    function changeUserName() {
+      const currentName = localStorage.getItem('yl_user_name') || "";
+      const newName = prompt("請修改您的名字:", currentName);
+      if (newName && newName.trim() !== "") {
+        localStorage.setItem('yl_user_name', newName.trim());
+        document.getElementById('user-title-name').innerText = newName.trim() + " 的";
+        alert(`已成功更新名字為：${newName.trim()}！`);
+      }
+    }
+
+    function checkAuth() {
+      const isAuth = localStorage.getItem('stephanie_app_auth');
+      if (isAuth === 'true') {
+        checkUserNameAndStart();
+      }
+    }
+
+    const ylFullDatabase = [
+      "Angelica (天使草)", "Anise (茴香) [US]", "Basil (羅勒)", "Bergamot (佛手柑)", "Black Pepper (黑胡椒)",
+      "Blue Cypress (藍絲柏)", "Blue Tansy (藍艾菊)", "Bourbon Geranium (波旁天竺葵)", "Cardamom (豆蔻)",
+      "Carrot Seed (胡蘿蔔籽)", "Cassia (桂皮) [US]", "Cedarwood (北非雪松)", "Celery Seed (芹菜籽) [US]",
+      "Cinnamint [US]", "Cinnamon Bark (肉桂)", "Cistus (岩玫瑰)", "Citronella (香茅)", "Clary Sage (快樂鼠尾草)",
+      "Clove (丁香)", "Copaiba (苦配巴)", "Coriander (芫荽籽) [US]", "Cumin (小茴香) [US]", "Cypress (絲柏)",
+      "Dill (蒔蘿) [US]", "Dorado Azul (藍多拉多)", "Eucalyptus Blue (藍尤加利)", "Eucalyptus Globulus (藍膠尤加利)",
+      "Eucalyptus Radiata (放射尤加利)", "Fennel (甜茴香)", "Frankincense (乳香)", "Geranium (天竺葵)",
+      "German Chamomile (德國洋甘菊)", "Ginger (生薑)", "Grapefruit (葡萄柚)", "Helichrysum (永久花)",
+      "Hong Kuai (紅檜)", "Hyssop (牛膝草)", "Idaho Blue Spruce (愛達荷藍雲杉)", "Idaho Grand Fir (愛達荷巨杉)",
+      "Jade Lemon (玉檸檬)", "Jasmine (茉莉)", "Juniper (杜松)", "Kunzea (昆士亞)", "Laurus Nobilis (月桂) [US]",
+      "Lavender (薰衣草)", "Ledum (杜香) [US]", "Lemon (檸檬)", "Lemon Myrtle (檸檬香桃木)", "Lemongrass (檸檬草)",
+      "Lime (青檸)", "Madagascar Vanilla (馬達加斯加香草)", "Manuka (麥盧卡)",
+      "Marjoram (馬鬱蘭)", "Mastic (乳香脂) [US]", "Melaleuca Quinquenervia (綠花白千層)", "Melissa (香蜂草)",
+      "Mountain Savory (山地香草) [US]", "Myrrh (沒藥)", "Myrtle (香桃木)", "Neroli (橙花)",
+      "Northern Lights Black Spruce (北極光黑雲杉)", "Nutmeg (肉豆蔻)", "Ocotea (奧寇梯木)", "Orange (甜橙)",
+      "Oregano (牛至)", "Palmarosa (玫瑰草)", "Palo Santo (聖木)", "Parsley (歐芹) [US]", "Patchouli (廣藿香)",
+      "Peppermint (薄荷)", "Petitgrain (苦橙葉)", "Pine (松針)", "Ponderosa Pine [US]", "Ravintsara (羅文莎葉)",
+      "Roman Chamomile (羅馬洋甘菊)", "Rose (玫瑰)", "Rosemary (迷迭香)", "Royal Hawaiian Sandalwood (皇家夏威夷檀香)",
+      "Sacred Frankincense (神聖乳香)", "Sacred Sandalwood (神聖檀香)", "Sage (鼠尾草)",
+      "Spearmint (綠薄荷)", "Spikenard (甘松) [US]", "St. Maries Lavender [US]", "Tangerine (紅橘)", "Tarragon (龍蒿) [US]",
+      "Tea Tree / Melaleuca Alternifolia (茶樹)", "Thyme (百里香)", "Tsuga (鐵杉) [US]", "Valerian (缬草)",
+      "Vetiver (岩蘭草)", "White Fir (白冷杉) [US]", "Wintergreen (冬青)", "Ylang Ylang (依蘭依蘭)", "Yuzu (柚子) [US]",
+      "Abundance (豐盛)", "Acceptance (接納)", "Aroma Sievez (愛樂美)", "AromaEase (舒緩)", "Awaken (喚醒)",
+      "Believe (信念)", "Brain Power (腦力)", "Breathe Again", "Build Your Dream (築夢)", "Christmas Spirit (聖誕氣息)",
+      "Citrus Fresh (清新柑橘)", "Clarity (清晰)", "Common Sense (常識)", "Compassion (慈悲) [US]", "Cool Azul (酷藍)",
+      "DiGize (樂吉)", "Dragon Time (龍之時間)", "Dream Catcher (追夢人)", "EndoFlex (內分泌)", "Envision (遠景)",
+      "Excite (激勵) [US]", "Forgiveness (寬恕)", "Gathering (聚會)", "Gentle Baby (溫和嬰兒)", "Gratitude (感恩)",
+      "Grounding (大地)", "Harmony (協調)", "Highest Potential (最高潛能)", "Immupower (免疫力)", "Inner Child (內在小孩)",
+      "Inspiration (靈感)", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
+      "Magnificent Power [US]", "Melrose (梅爾羅斯)", "M-Grain (偏頭痛)", "Motivation (動機)", "One Heart (一心)",
+      "PanAway (舒肌)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
+      "Release (釋放)", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
+      "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
+      "Valor (勇氣)", "Valor II", "White Angelica (白天使)",
+      "Breathe Again Roll-On (暢吸滾珠)", "Deep Relief Roll-On (深層舒緩滾珠)", "Peace & Calming Roll-On (和平安寧滾珠)",
+      "RC Roll-On (樂吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)",
+      "Simplified by Jacob & Kait - Citrus Bloom", "Simplified by Jacob & Kait - Lavender", "Simplified by Jacob & Kait - Peppermint"
+    ];
+
+    let inventory = JSON.parse(localStorage.getItem('yl_essential_oils')) || [];
+
+    function initDatalist() {
+      const datalist = document.getElementById('yl-oils-datalist');
+      datalist.innerHTML = '';
+      ylFullDatabase.forEach(oil => {
+        const option = document.createElement('option');
+        option.value = oil;
+        datalist.appendChild(option);
+      });
+    }
+
+    function saveData() {
+      localStorage.setItem('yl_essential_oils', JSON.stringify(inventory));
+      render();
+    }
+
+    function saveOilItem() {
+      const editId = document.getElementById('edit-id').value;
+      const rawInput = document.getElementById('oil-name-input').value.trim();
+      const qtyToAdd = parseInt(document.getElementById('oil-qty').value) || 1;
+
+      if (!rawInput) {
+        alert('請選取或輸入精油英文名稱！');
+        return;
+      }
+
+      const name = rawInput;
+      const size = document.getElementById('oil-size').value;
+      const status = document.getElementById('oil-status').value;
+
+      if (editId) {
+        const item = inventory.find(i => i.id === editId);
+        if (item) {
+          item.name = name;
+          item.size = size;
+          item.status = status;
+          item.qty = qtyToAdd;
+          alert(`已成功更新 ${name} 的資料！`);
+        }
+      } else {
+        const existingItem = inventory.find(i => i.name === name && i.size === size && i.status === status);
+        if (existingItem) {
+          existingItem.qty = (parseInt(existingItem.qty) || 1) + qtyToAdd;
+          alert(`已自動合併！${name} (${size}) 數量增加 ${qtyToAdd} (現共 ${existingItem.qty})！`);
+        } else {
+          const newItem = {
+            id: Date.now().toString(),
+            name: name,
+            size: size,
+            status: status,
+            qty: qtyToAdd,
+            dateAdded: new Date().toLocaleDateString()
+          };
+          inventory.push(newItem);
+          alert(`已成功加入 ${qtyToAdd} 支 ${name} (${size})！`);
+        }
+      }
+
+      saveData();
+      resetForm();
+    }
+
+    function editOil(id) {
+      const item = inventory.find(i => i.id === id);
+      if (item) {
+        document.getElementById('edit-id').value = item.id;
+        document.getElementById('oil-name-input').value = item.name;
+        document.getElementById('oil-size').value = item.size;
+        document.getElementById('oil-status').value = item.status;
+        document.getElementById('oil-qty').value = item.qty || 1;
+        
+        document.getElementById('form-title').innerText = '✏️ 修改精油資料';
+        document.getElementById('submit-btn').innerText = '💾 儲存修改';
+        document.getElementById('submit-btn').style.backgroundColor = '#d97706';
+        document.getElementById('cancel-btn').style.display = 'block';
+        
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function resetForm() {
+      document.getElementById('edit-id').value = '';
+      document.getElementById('oil-name-input').value = '';
+      document.getElementById('oil-size').value = '15 ml';
+      document.getElementById('oil-status').value = 'unopened';
+      document.getElementById('oil-qty').value = '1';
+      
+      document.getElementById('form-title').innerText = '➕ 快速選單 / 搜尋入庫';
+      document.getElementById('submit-btn').innerText = '➕ 確認新增至庫存';
+      document.getElementById('submit-btn').style.backgroundColor = 'var(--primary)';
+      document.getElementById('cancel-btn').style.display = 'none';
+    }
+
+    function deleteOil(id) {
+      if (confirm('確定要刪除此項精油紀錄嗎？')) {
+        inventory = inventory.filter(item => item.id !== id);
+        saveData();
+      }
+    }
+
+    function toggleStatus(id) {
+      const item = inventory.find(i => i.id === id);
+      if (!item) return;
+
+      const currentQty = parseInt(item.qty) || 1;
+
+      if (item.status === 'unopened' && currentQty > 1) {
+        item.qty = currentQty - 1;
+
+        const openedItem = inventory.find(i => i.name === item.name && i.size === item.size && i.status === 'opened');
+        if (openedItem) {
+          openedItem.qty = (parseInt(openedItem.qty) || 1) + 1;
+        } else {
+          inventory.push({
+            id: Date.now().toString(),
+            name: item.name,
+            size: item.size,
+            status: 'opened',
+            qty: 1,
+            dateAdded: new Date().toLocaleDateString()
+          });
+        }
+      } else {
+        const targetStatus = item.status === 'opened' ? 'unopened' : 'opened';
+        const oppositeItem = inventory.find(i => i.name === item.name && i.size === item.size && i.status === targetStatus);
+
+        if (oppositeItem) {
+          oppositeItem.qty = (parseInt(oppositeItem.qty) || 1) + currentQty;
+          inventory = inventory.filter(i => i.id !== id);
+        } else {
+          item.status = targetStatus;
+        }
+      }
+
+      saveData();
+    }
+
+    function render() {
+      const listEl = document.getElementById('oil-list');
+      const search = document.getElementById('search-input').value.toLowerCase();
+      const totalCountEl = document.getElementById('total-count');
+      
+      listEl.innerHTML = '';
+      const filtered = inventory.filter(item => item.name.toLowerCase().includes(search));
+      totalCountEl.innerText = filtered.length;
+
+      filtered.forEach(item => {
+        const qty = item.qty || 1;
+        const sizeDisplay = item.size.includes('Roll-on') ? 'Roll-on' : item.size;
+        
+        const div = document.createElement('div');
+        div.className = 'oil-item';
+        div.innerHTML = `
+          <div class="oil-info">
+            <div class="oil-name">${item.name} (${sizeDisplay}) <span style="color: var(--primary); font-size: 0.9em; font-weight: bold;">× ${qty}</span></div>
+            <div class="oil-details">入庫: ${item.dateAdded}</div>
+          </div>
+          <div class="action-btns">
+            <span class="badge ${item.status === 'opened' ? 'badge-opened' : 'badge-unopened'}" onclick="toggleStatus('${item.id}')">
+              ${item.status === 'opened' ? '已開' : '未開'}
+            </span>
+            <button onclick="editOil('${item.id}')" style="width:auto; padding: 4px 8px; background:#d97706;">✏️</button>
+            <button onclick="deleteOil('${item.id}')" style="width:auto; padding: 4px 8px; background:#e63946;">🗑️</button>
+          </div>
+        `;
+        listEl.appendChild(div);
+      });
+
+      checkRestockAlerts();
+    }
+
+    function checkRestockAlerts() {
+      const restockSection = document.getElementById('restock-section');
+      const restockList = document.getElementById('restock-list');
+      restockList.innerHTML = '';
+      let needsAlert = false;
+
+      const allSummary = {};
+      inventory.forEach(item => {
+        const qty = parseInt(item.qty) || 1;
+        const key = `${item.name}_${item.size}`;
+        if (!allSummary[key]) {
+          allSummary[key] = { name: item.name, size: item.size, unopenedQty: 0, openedQty: 0 };
+        }
+        if (item.status === 'unopened') {
+          allSummary[key].unopenedQty += qty;
+        } else {
+          allSummary[key].openedQty += qty;
+        }
+      });
+
+      const level1Alerts = [];
+      const level2Alerts = [];
+
+      for (const data of Object.values(allSummary)) {
+        if (data.unopenedQty === 0) {
+          level1Alerts.push(`🔴 <strong>${data.name} (${data.size})</strong>：完全無未開封存貨 (已開總共 ${data.openedQty} 支)`);
+        } else if (data.unopenedQty === 1 && data.size === '5 ml') {
+          level2Alerts.push(`🟡 <strong>${data.name} (5 ml)</strong>：未開封只剩 1 支 (低庫存預警)`);
+        }
+      }
+
+      if (level1Alerts.length > 0) {
+        needsAlert = true;
+        const h3 = document.createElement('div');
+        h3.innerHTML = '<strong style="color:#e63946;">【一級斷貨警示】(無未開封)</strong>';
+        restockList.appendChild(h3);
+        level1Alerts.forEach(text => {
+          const p = document.createElement('div');
+          p.style.margin = '4px 0 4px 12px';
+          p.innerHTML = text;
+          restockList.appendChild(p);
+        });
+      }
+
+      if (level2Alerts.length > 0) {
+        needsAlert = true;
+        const h3 = document.createElement('div');
+        h3.style.marginTop = level1Alerts.length > 0 ? '10px' : '0';
+        h3.innerHTML = '<strong style="color:#d97706;">【二級預警】(未開只剩 1 支 5ml)</strong>';
+        restockList.appendChild(h3);
+        level2Alerts.forEach(text => {
+          const p = document.createElement('div');
+          p.style.margin = '4px 0 4px 12px';
+          p.innerHTML = text;
+          restockList.appendChild(p);
+        });
+      }
+
+      restockSection.style.display = needsAlert ? 'block' : 'none';
+    }
+
+    // 💡 完美修復：使用 Blob 下載備份，確保手機端順利觸發下載
+    function exportData() {
+      const dataStr = JSON.stringify(inventory, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.href = url;
+      downloadAnchor.download = `yl_oils_backup_${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function importData(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          if (Array.isArray(importedData)) {
+            if (confirm(`確定要還原此備份嗎？這將會載入 ${importedData.length} 筆精油紀錄。`)) {
+              inventory = importedData;
+              saveData();
+              alert('數據還原成功！');
+            }
+          } else {
+            alert('檔案格式不正確，請上載正確的 JSON 備份檔！');
+          }
+        } catch (err) {
+          alert('解析檔案失敗，請確保這是有效的 JSON 備份檔。');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function clearData() {
+      if (confirm('警告：這會清空所有精油庫存數據！確定要繼續？')) {
+        inventory = [];
+        saveData();
+      }
+    }
+
+    checkAuth();
+  </script>
+</body>
+</html>
