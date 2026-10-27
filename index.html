@@ -331,13 +331,11 @@
       document.getElementById('app-content').style.display = 'block';
       initDatalist();
       
-      // 💡 自動修復並兼容舊容量格式
       fixOldInventoryFormat();
       autoConsolidateInventory();
       render();
     }
 
-    // 💡 自動修正舊格式容量（例如將舊的 "15" 自動轉為 "15 ml"）
     function fixOldInventoryFormat() {
       let data = JSON.parse(localStorage.getItem('yl_essential_oils')) || [];
       let updated = false;
@@ -346,6 +344,11 @@
         if (item.size === '5') { item.size = '5 ml'; updated = true; }
         if (item.size === '10') { item.size = '10 ml'; updated = true; }
         if (item.size === '10 (Roll-on)' || item.size === 'Roll-on (10ml)') { item.size = 'Roll-on'; updated = true; }
+        // 修正舊資料中的 R.C. 為 RC
+        if (item.name && item.name.startsWith('R.C.')) {
+          item.name = item.name.replace('R.C.', 'RC');
+          updated = true;
+        }
       });
       if (updated) {
         localStorage.setItem('yl_essential_oils', JSON.stringify(data));
@@ -415,12 +418,12 @@
       "Grounding (大地)", "Harmony (協調)", "Highest Potential (最高潛能)", "Immupower (免疫力)", "Inner Child (內在小孩)",
       "Inspiration (靈感)", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
       "Magnificent Power [US]", "Melrose (梅爾羅斯)", "M-Grain (偏頭痛)", "Motivation (動機)", "One Heart (一心)",
-      "PanAway (舒肌)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "R.C. (呼吸)",
+      "PanAway (舒肌)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
       "Release (釋放)", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
       "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
       "Valor (勇氣)", "Valor II", "White Angelica (白天使)",
       "Breathe Again Roll-On (暢吸滾珠)", "Deep Relief Roll-On (深層舒緩滾珠)", "Peace & Calming Roll-On (和平安寧滾珠)",
-      "R.C. Roll-On (呼吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)",
+      "RC Roll-On (樂吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)",
       "Simplified by Jacob & Kait - Citrus Bloom", "Simplified by Jacob & Kait - Lavender", "Simplified by Jacob & Kait - Peppermint"
     ];
 
@@ -657,14 +660,18 @@
       restockSection.style.display = needsAlert ? 'block' : 'none';
     }
 
+    // 💡 完美修復：使用 Blob 下載備份，確保手機端順利觸發下載
     function exportData() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory, null, 2));
+      const dataStr = JSON.stringify(inventory, null, 2);
+      const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
       const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", `yl_oils_backup_${new Date().toISOString().slice(0,10)}.json`);
+      downloadAnchor.href = url;
+      downloadAnchor.download = `yl_oils_backup_${new Date().toISOString().slice(0,10)}.json`;
       document.body.appendChild(downloadAnchor);
       downloadAnchor.click();
       downloadAnchor.remove();
+      URL.revokeObjectURL(url);
     }
 
     function importData(event) {
