@@ -250,7 +250,7 @@
       <input type="hidden" id="edit-id">
       
       <label style="font-size: 0.85em; color: #666; font-weight: bold;">點擊選擇或輸入英文字母快速搜尋：</label>
-      <input list="yl-oils-datalist" id="oil-name-input" placeholder="🔍 點擊選取或輸入 (例: Peppermint, Valor)..." autocomplete="off">
+      <input list="yl-oils-datalist" id="oil-name-input" placeholder="🔍 點擊選取或輸入 (例: Peppermint, Original Valor)..." autocomplete="off">
       
       <datalist id="yl-oils-datalist"></datalist>
 
@@ -344,9 +344,16 @@
         if (item.size === '5') { item.size = '5 ml'; updated = true; }
         if (item.size === '10') { item.size = '10 ml'; updated = true; }
         if (item.size === '10 (Roll-on)' || item.size === 'Roll-on (10ml)') { item.size = 'Roll-on'; updated = true; }
-        // 修正舊資料中的 R.C. 為 RC
         if (item.name && item.name.startsWith('R.C.')) {
           item.name = item.name.replace('R.C.', 'RC');
+          updated = true;
+        }
+        if (item.name && (item.name === 'Valor (勇氣)' || item.name === 'Valor')) {
+          item.name = 'Original Valor (勇氣)';
+          updated = true;
+        }
+        if (item.name && (item.name === 'Valor Roll-On (勇氣滾珠)' || item.name === 'Valor Roll-On')) {
+          item.name = 'Original Valor Roll-On (勇氣滾珠)';
           updated = true;
         }
       });
@@ -421,9 +428,9 @@
       "PanAway (舒肌)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
       "Release (釋放)", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
       "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
-      "Valor (勇氣)", "Valor II", "White Angelica (白天使)",
+      "Original Valor (勇氣)", "Valor II", "White Angelica (白天使)",
       "Breathe Again Roll-On (暢吸滾珠)", "Deep Relief Roll-On (深層舒緩滾珠)", "Peace & Calming Roll-On (和平安寧滾珠)",
-      "RC Roll-On (樂吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)",
+      "RC Roll-On (樂吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Original Valor Roll-On (勇氣滾珠)",
       "Simplified by Jacob & Kait - Citrus Bloom", "Simplified by Jacob & Kait - Lavender", "Simplified by Jacob & Kait - Peppermint"
     ];
 
@@ -660,7 +667,6 @@
       restockSection.style.display = needsAlert ? 'block' : 'none';
     }
 
-    // 💡 完美修復：使用 Blob 下載備份，確保手機端順利觸發下載
     function exportData() {
       const dataStr = JSON.stringify(inventory, null, 2);
       const blob = new Blob([dataStr], { type: "application/json;charset=utf-8" });
