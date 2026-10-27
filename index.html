@@ -284,7 +284,7 @@
 
     <!-- 庫存列表 -->
     <div class="card">
-      <h2 style="font-size:1.1em;">目前庫存種類 (<span id="total-count">0</span>)</h2>
+      <h2 style="font-size:1.1em;">目前庫存種類 (<span id="total-count">0</span>) | 精油總支數 (<span id="total-qty-count">0</span>)</h2>
       <input type="text" id="search-input" onkeyup="render()" placeholder="🔍 在庫存中搜尋英文名稱...">
       <div id="oil-list"></div>
     </div>
@@ -402,7 +402,7 @@
       "Clove (丁香)", "Copaiba (苦配巴)", "Coriander (芫荽籽) [US]", "Cumin (小茴香) [US]", "Cypress (絲柏)",
       "Dill (蒔蘿) [US]", "Dorado Azul (藍多拉多)", "Eucalyptus Blue (藍尤加利)", "Eucalyptus Globulus (藍膠尤加利)",
       "Eucalyptus Radiata (放射尤加利)", "Fennel (甜茴香)", "Frankincense (乳香)", "Geranium (天竺葵)",
-      "German Chamomile (德國洋甘菊)", "Ginger (生薑)", "Grapefruit (葡萄柚)", "Helichrysum (永久花)",
+      "German Chamomile (德國洋甘菊)", "Ginger (生薑)", "Grapefruit (葡萄柚)", "Grounding", "Helichrysum (永久花)",
       "Hong Kuai (紅檜)", "Hyssop (牛膝草)", "Idaho Blue Spruce (愛達荷藍雲杉)", "Idaho Grand Fir (愛達荷巨杉)",
       "Jade Lemon (玉檸檬)", "Jasmine (茉莉)", "Juniper (杜松)", "Kunzea (昆士亞)", "Laurus Nobilis (月桂) [US]",
       "Lavender (薰衣草)", "Ledum (杜香) [US]", "Lemon (檸檬)", "Lemon Myrtle (檸檬香桃木)", "Lemongrass (檸檬草)",
@@ -414,18 +414,18 @@
       "Peppermint (薄荷)", "Petitgrain (苦橙葉)", "Pine (松針)", "Ponderosa Pine [US]", "Ravintsara (羅文莎葉)",
       "Roman Chamomile (羅馬洋甘菊)", "Rose (玫瑰)", "Rosemary (迷迭香)", "Royal Hawaiian Sandalwood (皇家夏威夷檀香)",
       "Sacred Frankincense (神聖乳香)", "Sacred Sandalwood (神聖檀香)", "Sage (鼠尾草)",
-      "Spearmint (綠薄荷)", "Spikenard (甘松) [US]", "St. Maries Lavender [US]", "Tangerine (紅橘)", "Tarragon (龍蒿) [US]",
+      "Spearmint (綠薄荷)", "Spikenard (甘松) [US]", "St. Maries Lavender [US]", "Tangerine (蜜柑)", "Tarragon (龍蒿) [US]",
       "Tea Tree / Melaleuca Alternifolia (茶樹)", "Thyme (百里香)", "Tsuga (鐵杉) [US]", "Valerian (缬草)",
       "Vetiver (岩蘭草)", "White Fir (白冷杉) [US]", "Wintergreen (冬青)", "Ylang Ylang (依蘭依蘭)", "Yuzu (柚子) [US]",
-      "Abundance (豐盛)", "Acceptance (接納)", "Aroma Sievez (愛樂美)", "AromaEase (舒緩)", "Awaken (喚醒)",
-      "Believe (信念)", "Brain Power (腦力)", "Breathe Again", "Build Your Dream (築夢)", "Christmas Spirit (聖誕氣息)",
+      "Abundance (豐盛)", "Acceptance (接納)", "Aroma Sievez (愛樂美)", "AromaEase (舒緩)", "Awaken", "Awaken (New)",
+      "Believe (信念)", "Brain Power (腦力)", "Breathe Again", "Build Your Dream", "Christmas Spirit (聖誕氣息)",
       "Citrus Fresh (清新柑橘)", "Clarity (清晰)", "Common Sense (常識)", "Compassion (慈悲) [US]", "Cool Azul (酷藍)",
-      "DiGize (樂吉)", "Dragon Time (龍之時間)", "Dream Catcher (追夢人)", "EndoFlex (內分泌)", "Envision (遠景)",
+      "DiGize (悠暢)", "Dragon Time (龍之時間)", "Dream Catcher (追夢人)", "EndoFlex (內分泌)", "Envision (遠景)",
       "Excite (激勵) [US]", "Forgiveness (寬恕)", "Gathering (聚會)", "Gentle Baby (溫和嬰兒)", "Gratitude (感恩)",
-      "Grounding (大地)", "Harmony (協調)", "Highest Potential (最高潛能)", "Immupower (免疫力)", "Inner Child (內在小孩)",
+      "Harmony (樂融)", "Highest Potential", "Immupower (免疫力)", "Inner Child (內在小孩)",
       "Inspiration (靈感)", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
       "Magnificent Power [US]", "Melrose (梅爾羅斯)", "M-Grain (偏頭痛)", "Motivation (動機)", "One Heart (一心)",
-      "PanAway (舒肌)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
+      "PanAway (深舒)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
       "Release (釋放)", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
       "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
       "Original Valor (勇氣)", "Valor II", "White Angelica (白天使)",
@@ -576,10 +576,35 @@
       const listEl = document.getElementById('oil-list');
       const search = document.getElementById('search-input').value.toLowerCase();
       const totalCountEl = document.getElementById('total-count');
+      const totalQtyCountEl = document.getElementById('total-qty-count');
       
       listEl.innerHTML = '';
       const filtered = inventory.filter(item => item.name.toLowerCase().includes(search));
-      totalCountEl.innerText = filtered.length;
+      
+      totalCountEl.innerText = inventory.length;
+      
+      // 計算精油總支數
+      let totalQtySum = 0;
+      inventory.forEach(i => totalQtySum += (parseInt(i.qty) || 1));
+      totalQtyCountEl.innerText = totalQtySum;
+
+      // 💡 排序邏輯：1. 英文名字 A-Z  2. 已開 (opened) 排在未開 (unopened) 前面  3. 容量細至大
+      const sizeRank = { '5 ml': 1, '10 ml': 2, '15 ml': 3, 'Roll-on': 4 };
+      
+      filtered.sort((a, b) => {
+        // 1. 英文名字對比
+        const nameCompare = a.name.localeCompare(b.name);
+        if (nameCompare !== 0) return nameCompare;
+
+        // 2. 狀態對比：已開 (opened) 排在未開 (unopened) 前面
+        if (a.status === 'opened' && b.status === 'unopened') return -1;
+        if (a.status === 'unopened' && b.status === 'opened') return 1;
+
+        // 3. 容量大小細至大
+        const rankA = sizeRank[a.size] || 99;
+        const rankB = sizeRank[b.size] || 99;
+        return rankA - rankB;
+      });
 
       filtered.forEach(item => {
         const qty = item.qty || 1;
