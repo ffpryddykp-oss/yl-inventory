@@ -422,11 +422,11 @@
       "Citrus Fresh (清新柑橘)", "Clarity (清晰)", "Common Sense (常識)", "Compassion (慈悲) [US]", "Cool Azul (酷藍)",
       "DiGize (悠暢)", "Dragon Time (龍之時間)", "Dream Catcher (追夢人)", "EndoFlex (內分泌)", "Envision (遠景)",
       "Excite (激勵) [US]", "Forgiveness (寬恕)", "Gathering (聚會)", "Gentle Baby (溫和嬰兒)", "Gratitude (感恩)",
-      "Harmony (樂融)", "Highest Potential", "Immupower (免疫力)", "Inner Child (內在小孩)",
+      "Harmony", "Highest Potential", "Immupower (免疫力)", "Inner Child (內在小孩)",
       "Inspiration (靈感)", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
       "Magnificent Power [US]", "Melrose (梅爾羅斯)", "M-Grain (偏頭痛)", "Motivation (動機)", "One Heart (一心)",
       "PanAway (深舒)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
-      "Release (釋放)", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
+      "Release", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
       "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
       "Original Valor (勇氣)", "Valor II", "White Angelica (白天使)",
       "Breathe Again Roll-On (暢吸滾珠)", "Deep Relief Roll-On (深層舒緩滾珠)", "Peace & Calming Roll-On (和平安寧滾珠)",
@@ -583,24 +583,19 @@
       
       totalCountEl.innerText = inventory.length;
       
-      // 計算精油總支數
       let totalQtySum = 0;
       inventory.forEach(i => totalQtySum += (parseInt(i.qty) || 1));
       totalQtyCountEl.innerText = totalQtySum;
 
-      // 💡 排序邏輯：1. 英文名字 A-Z  2. 已開 (opened) 排在未開 (unopened) 前面  3. 容量細至大
       const sizeRank = { '5 ml': 1, '10 ml': 2, '15 ml': 3, 'Roll-on': 4 };
       
       filtered.sort((a, b) => {
-        // 1. 英文名字對比
         const nameCompare = a.name.localeCompare(b.name);
         if (nameCompare !== 0) return nameCompare;
 
-        // 2. 狀態對比：已開 (opened) 排在未開 (unopened) 前面
         if (a.status === 'opened' && b.status === 'unopened') return -1;
         if (a.status === 'unopened' && b.status === 'opened') return 1;
 
-        // 3. 容量大小細至大
         const rankA = sizeRank[a.size] || 99;
         const rankB = sizeRank[b.size] || 99;
         return rankA - rankB;
