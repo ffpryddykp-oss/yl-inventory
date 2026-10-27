@@ -244,8 +244,8 @@
       <div id="restock-list"></div>
     </div>
 
-    <!-- 快速選單 -->
-    <div class="card">
+    <!-- 快速選單 / 表單卡片 -->
+    <div id="form-card" class="card">
       <h2 id="form-title" style="font-size:1.1em;">➕ 快速選單 / 搜尋入庫</h2>
       <input type="hidden" id="edit-id">
       
@@ -336,27 +336,49 @@
       render();
     }
 
+    // 💡 自動更新/修復已入庫舊精油名稱（清除不需要的中文名）
     function fixOldInventoryFormat() {
       let data = JSON.parse(localStorage.getItem('yl_essential_oils')) || [];
       let updated = false;
+
+      const nameReplacements = {
+        'Valor (勇氣)': 'Original Valor',
+        'Valor': 'Original Valor',
+        'Valor Roll-On (勇氣滾珠)': 'Original Valor Roll-On',
+        'Valor Roll-On': 'Original Valor Roll-On',
+        'Grounding (大地)': 'Grounding',
+        'Harmony (協調)': 'Harmony',
+        'Highest Potential (最高潛能)': 'Highest Potential',
+        'Release (釋放)': 'Release',
+        'Build Your Dream (築夢)': 'Build Your Dream',
+        'Believe (信念)': 'Believe',
+        'Inspiration (靈感)': 'Inspiration',
+        'Tangerine (紅橘)': 'Tangerine',
+        'Tangerine (蜜柑)': 'Tangerine',
+        'PanAway (舒肌)': 'PanAway',
+        'PanAway (深舒)': 'PanAway',
+        'DiGize (樂吉)': 'DiGize',
+        'DiGize (悠暢)': 'DiGize'
+      };
+
       data.forEach(item => {
         if (item.size === '15') { item.size = '15 ml'; updated = true; }
         if (item.size === '5') { item.size = '5 ml'; updated = true; }
         if (item.size === '10') { item.size = '10 ml'; updated = true; }
         if (item.size === '10 (Roll-on)' || item.size === 'Roll-on (10ml)') { item.size = 'Roll-on'; updated = true; }
+        
         if (item.name && item.name.startsWith('R.C.')) {
           item.name = item.name.replace('R.C.', 'RC');
           updated = true;
         }
-        if (item.name && (item.name === 'Valor (勇氣)' || item.name === 'Valor')) {
-          item.name = 'Original Valor (勇氣)';
-          updated = true;
-        }
-        if (item.name && (item.name === 'Valor Roll-On (勇氣滾珠)' || item.name === 'Valor Roll-On')) {
-          item.name = 'Original Valor Roll-On (勇氣滾珠)';
+
+        // 精準比對並替換舊名稱
+        if (nameReplacements[item.name]) {
+          item.name = nameReplacements[item.name];
           updated = true;
         }
       });
+
       if (updated) {
         localStorage.setItem('yl_essential_oils', JSON.stringify(data));
       }
@@ -418,12 +440,12 @@
       "Tea Tree / Melaleuca Alternifolia (茶樹)", "Thyme (百里香)", "Tsuga (鐵杉) [US]", "Valerian (缬草)",
       "Vetiver (岩蘭草)", "White Fir (白冷杉) [US]", "Wintergreen (冬青)", "Ylang Ylang (依蘭依蘭)", "Yuzu (柚子) [US]",
       "Abundance (豐盛)", "Acceptance (接納)", "Aroma Sievez (愛樂美)", "AromaEase (舒緩)", "Awaken", "Awaken (New)",
-      "Believe (信念)", "Brain Power (腦力)", "Breathe Again", "Build Your Dream", "Christmas Spirit (聖誕氣息)",
+      "Believe", "Brain Power (腦力)", "Breathe Again", "Build Your Dream", "Christmas Spirit (聖誕氣息)",
       "Citrus Fresh (清新柑橘)", "Clarity (清晰)", "Common Sense (常識)", "Compassion (慈悲) [US]", "Cool Azul (酷藍)",
       "DiGize (悠暢)", "Dragon Time (龍之時間)", "Dream Catcher (追夢人)", "EndoFlex (內分泌)", "Envision (遠景)",
       "Excite (激勵) [US]", "Forgiveness (寬恕)", "Gathering (聚會)", "Gentle Baby (溫和嬰兒)", "Gratitude (感恩)",
       "Harmony", "Highest Potential", "Immupower (免疫力)", "Inner Child (內在小孩)",
-      "Inspiration (靈感)", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
+      "Inspiration", "Into the Future (邁向未來)", "Joy (喜悅)", "Juva Cleanse (排毒)", "Juva Flex",
       "Magnificent Power [US]", "Melrose (梅爾羅斯)", "M-Grain (偏頭痛)", "Motivation (動機)", "One Heart (一心)",
       "PanAway (深舒)", "Peace & Calming (和平與安寧)", "Peace & Calming II", "Purification (淨化)", "RC (樂吸)",
       "Release", "Relieve It [US]", "Sacred Mountain (神聖山脈)", "SARA", "Sensation (感覺)", "Stress Away (樂自在)",
@@ -511,7 +533,7 @@
         document.getElementById('submit-btn').style.backgroundColor = '#d97706';
         document.getElementById('cancel-btn').style.display = 'block';
         
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document.getElementById('form-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
 
