@@ -258,9 +258,10 @@
         <div style="flex: 1;">
           <label style="font-size: 0.8em; color: #666;">容量：</label>
           <select id="oil-size">
-            <option value="15">15 ml</option>
-            <option value="5">5 ml</option>
-            <option value="10">10 ml (Roll-on)</option>
+            <option value="15 ml">15 ml</option>
+            <option value="10 ml">10 ml</option>
+            <option value="5 ml">5 ml</option>
+            <option value="Roll-on">Roll-on</option>
           </select>
         </div>
         <div style="flex: 1;">
@@ -401,10 +402,9 @@
       "Surrender (臣服)", "Thieves (盜賊)", "Three Wise Men (三賢者)", "Transformation (蛻變)", "Trauma Life (創傷生活)",
       "Valor (勇氣)", "Valor II", "White Angelica (白天使)",
       "Breathe Again Roll-On (暢吸滾珠)", "Deep Relief Roll-On (深層舒緩滾珠)", "Peace & Calming Roll-On (和平安寧滾珠)",
-      "R.C. Roll-On (呼吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)"
+      "R.C. Roll-On (呼吸滾珠)", "Stress Away Roll-On (樂自在滾珠)", "Tranquil Roll-On (寧靜滾珠)", "Valor Roll-On (勇氣滾珠)",
+      "Simplified by Jacob & Kait - Citrus Bloom", "Simplified by Jacob & Kait - Lavender", "Simplified by Jacob & Kait - Peppermint"
     ];
-
-    let inventory = JSON.parse(localStorage.getItem('yl_essential_oils')) || [];
 
     function initDatalist() {
       const datalist = document.getElementById('yl-oils-datalist');
@@ -448,7 +448,7 @@
         const existingItem = inventory.find(i => i.name === name && i.size === size && i.status === status);
         if (existingItem) {
           existingItem.qty = (parseInt(existingItem.qty) || 1) + qtyToAdd;
-          alert(`已自動合併！${name} (${size}ml) 數量增加 ${qtyToAdd} 支 (現共 ${existingItem.qty} 支)！`);
+          alert(`已自動合併！${name} (${size}) 數量增加 ${qtyToAdd} (現共 ${existingItem.qty})！`);
         } else {
           const newItem = {
             id: Date.now().toString(),
@@ -459,7 +459,7 @@
             dateAdded: new Date().toLocaleDateString()
           };
           inventory.push(newItem);
-          alert(`已成功加入 ${qtyToAdd} 支 ${name} (${size}ml)！`);
+          alert(`已成功加入 ${qtyToAdd} 支 ${name} (${size})！`);
         }
       }
 
@@ -488,7 +488,7 @@
     function resetForm() {
       document.getElementById('edit-id').value = '';
       document.getElementById('oil-name-input').value = '';
-      document.getElementById('oil-size').value = '15';
+      document.getElementById('oil-size').value = '15 ml';
       document.getElementById('oil-status').value = 'unopened';
       document.getElementById('oil-qty').value = '1';
       
@@ -505,18 +505,15 @@
       }
     }
 
-    // 💡 智能一鍵開瓶/切換邏輯
     function toggleStatus(id) {
       const item = inventory.find(i => i.id === id);
       if (!item) return;
 
       const currentQty = parseInt(item.qty) || 1;
 
-      // 如果係未開封，而且數量多過 1 支：自動拆分 1 支變成「已開」
       if (item.status === 'unopened' && currentQty > 1) {
-        item.qty = currentQty - 1; // 原本未開嘅數量 - 1
+        item.qty = currentQty - 1;
 
-        // 搵吓本身有冇「已開」嘅 Entry，有就 +1，冇就建立新 Entry
         const openedItem = inventory.find(i => i.name === item.name && i.size === item.size && i.status === 'opened');
         if (openedItem) {
           openedItem.qty = (parseInt(openedItem.qty) || 1) + 1;
@@ -531,13 +528,12 @@
           });
         }
       } else {
-        // 如果只有 1 支，直接切換狀態
         const targetStatus = item.status === 'opened' ? 'unopened' : 'opened';
         const oppositeItem = inventory.find(i => i.name === item.name && i.size === item.size && i.status === targetStatus);
 
         if (oppositeItem) {
           oppositeItem.qty = (parseInt(oppositeItem.qty) || 1) + currentQty;
-          inventory = inventory.filter(i => i.id !== id); // 合併後刪除舊 Entry
+          inventory = inventory.filter(i => i.id !== id);
         } else {
           item.status = targetStatus;
         }
@@ -557,11 +553,14 @@
 
       filtered.forEach(item => {
         const qty = item.qty || 1;
+        // 確保 Roll-on 顯示時不帶 ml
+        const sizeDisplay = item.size.includes('Roll-on') ? 'Roll-on' : item.size;
+        
         const div = document.createElement('div');
         div.className = 'oil-item';
         div.innerHTML = `
           <div class="oil-info">
-            <div class="oil-name">${item.name} (${item.size}ml) <span style="color: var(--primary); font-size: 0.9em; font-weight: bold;">× ${qty}</span></div>
+            <div class="oil-name">${item.name} (${sizeDisplay}) <span style="color: var(--primary); font-size: 0.9em; font-weight: bold;">× ${qty}</span></div>
             <div class="oil-details">入庫: ${item.dateAdded}</div>
           </div>
           <div class="action-btns">
@@ -603,9 +602,9 @@
 
       for (const data of Object.values(allSummary)) {
         if (data.unopenedQty === 0) {
-          level1Alerts.push(`🔴 <strong>${data.name} (${data.size}ml)</strong>：完全無未開封存貨 (已開總共 ${data.openedQty} 支)`);
-        } else if (data.unopenedQty === 1 && data.size === '5') {
-          level2Alerts.push(`🟡 <strong>${data.name} (5ml)</strong>：未開封只剩 1 支 (低庫存預警)`);
+          level1Alerts.push(`🔴 <strong>${data.name} (${data.size})</strong>：完全無未開封存貨 (已開總共 ${data.openedQty} 支)`);
+        } else if (data.unopenedQty === 1 && data.size === '5 ml') {
+          level2Alerts.push(`🟡 <strong>${data.name} (5 ml)</strong>：未開封只剩 1 支 (低庫存預警)`);
         }
       }
 
